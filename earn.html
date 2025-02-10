@@ -1,0 +1,77 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<style>
+</style>
+<div class="form">
+    <div class="form-group">
+        <h2>Add Apps</h2>
+<input type="file" id="imageInput" accept="image/*">
+<input type="text" id="title" placeholder="Enter Title" required class="int">
+<input type="text" id="referral" placeholder="Enter Referral Code" required class="int">
+<input type="url" id="appUrl" placeholder="Enter App URL" required class="int">
+<button onclick="uploadImage()" class="btn">Submit</button>
+</div>
+<p id="status"></p>
+</div>
+<script>
+    function uploadImage() {
+        const imageInput = document.getElementById('imageInput').files[0];
+        const title = document.getElementById('title').value;
+        const referral = document.getElementById('referral').value;
+        const appUrl = document.getElementById('appUrl').value;
+        const status = document.getElementById('status');
+
+        if (!imageInput || !title || !referral || !appUrl) {
+            alert("Please fill all fields and select an image.");
+            return;
+        }
+
+        status.innerText = "Uploading image...";
+
+        const formData = new FormData();
+        formData.append("image", imageInput);
+        formData.append("key", "a1aab7277069e3d6fa62ab397ae5dfca");
+
+        fetch("https://api.imgbb.com/1/upload", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const imageUrl = data.data.url;
+                status.innerText = "Image uploaded! Sending data...";
+                sendData(imageUrl, title, referral, appUrl);
+            } else {
+                status.innerText = "Image upload failed!";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            status.innerText = "Error uploading image!";
+        });
+    }
+
+    function sendData(imageUrl, title, referral, appUrl) {
+        const formData = new FormData();
+        formData.append("image_url", imageUrl);
+        formData.append("title", title);
+        formData.append("referral_code", referral);
+        formData.append("app_url", appUrl);
+
+        fetch("https://script.google.com/macros/s/AKfycbzvv5KIPoE6dnlI8jCx-4G1qdA4CC8K7wfR7ax_UYxWmVCE7k4e3Cw0E2FZ1w4MhRBuiw/exec", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('status').innerText = "Data submitted successfully!";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById('status').innerText = "Error submitting data!";
+        });
+    }
+</script>
